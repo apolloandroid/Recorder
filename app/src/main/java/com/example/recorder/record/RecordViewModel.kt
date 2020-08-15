@@ -42,6 +42,7 @@ class RecordViewModel constructor(private val app: Application) : AndroidViewMod
 
     fun startTimer() {
         val triggerTime = SystemClock.elapsedRealtime()
+//        change to custom scope
         viewModelScope.launch {
             saveTime(triggerTime)
             createTimer()
@@ -50,6 +51,7 @@ class RecordViewModel constructor(private val app: Application) : AndroidViewMod
 
     fun resetTimer() {
         _elapsedTime.value = timeFormatter(0)
+        //        change to custom scope
         viewModelScope.launch {
             saveTime(0)
         }

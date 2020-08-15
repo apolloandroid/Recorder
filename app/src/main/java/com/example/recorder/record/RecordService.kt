@@ -29,7 +29,6 @@ class RecordService : Service() {
     private var mDatabase: RecordDatabaseDao? = null
     private val mJob = Job()
     private val mUiScope = CoroutineScope(Dispatchers.Main + mJob)
-    private val CHANNEL_ID = "RecordService"
 
     override fun onCreate() {
         super.onCreate()
@@ -67,7 +66,10 @@ class RecordService : Service() {
     }
 
     private fun createNotification(): Notification? {
-        val mBuilder = NotificationCompat.Builder(applicationContext, CHANNEL_ID)
+        val mBuilder = NotificationCompat.Builder(
+            applicationContext,
+            getString(R.string.notification_channel_id)
+        )
             .setSmallIcon(R.drawable.ic_microphone)
             .setContentTitle(getString(R.string.app_name))
             .setContentText(getText(R.string.notification_recording))
