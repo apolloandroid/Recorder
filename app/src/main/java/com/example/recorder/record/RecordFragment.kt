@@ -25,9 +25,10 @@ import kotlinx.android.synthetic.main.fragment_record.*
 import java.io.File
 
 class RecordFragment : Fragment() {
+
     private lateinit var viewModel: RecordViewModel
     private lateinit var mainActivity: MainActivity
-    private var count: Int? = null
+//    private var count: Int? = null
     private var database: RecordDatabaseDao? = null
     private val MY_PERMISSIONS_RECORD_AUDIO = 123
 
@@ -42,14 +43,15 @@ class RecordFragment : Fragment() {
         )
 
         database = context?.let { RecordDatabase.getInstance(it).recordDatabaseDao }
-        database?.getCount()?.observe(this.viewLifecycleOwner, Observer { count = it })
+
+//        database?.getCount()?.observe(this.viewLifecycleOwner, Observer { count = it })
 
         mainActivity = activity as MainActivity
 
         viewModel = ViewModelProvider(this).get(RecordViewModel::class.java)
 
         binding.recordViewModel = viewModel
-        binding.lifecycleOwner = this.viewLifecycleOwner
+        binding.lifecycleOwner = viewLifecycleOwner
 
         if (!mainActivity.isServiceRunning()) {
             viewModel.resetTimer()
@@ -88,13 +90,13 @@ class RecordFragment : Fragment() {
 
     private fun onRecord(start: Boolean) {
         val intent = Intent(activity, RecordService::class.java)
-        intent.putExtra("COUNT", count)
+//        intent.putExtra("COUNT", count)
         if (start) {
             playButton.setImageResource(R.drawable.ic_stop)
             Toast.makeText(activity, R.string.toast_recording_start, Toast.LENGTH_LONG).show()
             val folder =
                 File(activity?.getExternalFilesDir(null)?.absolutePath.toString() + "/Recorder")
-            if (folder.exists()) {
+            if (!folder.exists()) {
                 folder.mkdir()
             }
             activity?.startService(intent)
