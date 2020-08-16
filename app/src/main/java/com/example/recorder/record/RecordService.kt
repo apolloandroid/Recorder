@@ -16,37 +16,43 @@ import com.example.recorder.database.RecordDatabaseDao
 import com.example.recorder.database.RecordingItem
 import kotlinx.coroutines.*
 import java.io.File
+import java.io.IOException
 import java.lang.Exception
 import java.text.SimpleDateFormat
 
 class RecordService : Service() {
+
     private var mFileName: String? = null
     private var mFilePath: String? = null
-    private var mCountRecords: Int? = null
+
     private var mRecorder: MediaRecorder? = null
+
     private var mStartingTimeMillis: Long = 0
     private var mElapsedTimeMillis: Long = 0
+
     private var mDatabase: RecordDatabaseDao? = null
+
     private val mJob = Job()
     private val mUiScope = CoroutineScope(Dispatchers.Main + mJob)
-
-    override fun onCreate() {
-        super.onCreate()
-        mDatabase = RecordDatabase.getInstance(applicationContext).recordDatabaseDao
-    }
 
     override fun onBind(intent: Intent?): IBinder? {
         return null
     }
 
+    override fun onCreate() {
+        super.onCreate()
+        mDatabase = RecordDatabase.getInstance(application).recordDatabaseDao
+    }
+
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
+
         startRecording()
-        mCountRecords = intent?.extras?.get("COUNT") as Int
         return START_NOT_STICKY
     }
 
     private fun startRecording() {
         setFileNameAndPath()
+
         mRecorder = MediaRecorder()
         mRecorder?.setAudioSource(MediaRecorder.AudioSource.MIC)
         mRecorder?.setOutputFormat(MediaRecorder.OutputFormat.MPEG_4)
@@ -74,15 +80,15 @@ class RecordService : Service() {
             .setContentTitle(getString(R.string.app_name))
             .setContentText(getText(R.string.notification_recording))
             .setOngoing(true)
-            .setContentIntent(
-                PendingIntent.getActivities(
-                    applicationContext, 0, arrayOf(
-                        Intent(
-                            applicationContext, MainActivity::class.java
-                        )
-                    ), 0
-                )
+        mBuilder.setContentIntent(
+            PendingIntent.getActivities(
+                applicationContext, 0, arrayOf(
+                    Intent(
+                        applicationContext, MainActivity::class.java
+                    )
+                ), 0
             )
+        )
         return mBuilder.build()
     }
 

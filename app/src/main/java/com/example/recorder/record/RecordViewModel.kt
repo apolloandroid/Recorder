@@ -14,12 +14,17 @@ import kotlinx.coroutines.withContext
 import java.util.concurrent.TimeUnit
 
 class RecordViewModel constructor(private val app: Application) : AndroidViewModel(app) {
+
     private val TRIGGER_TIME = "TRIGGER_AT"
     private val second: Long = 1_000L
+
     private val prefs = app.getSharedPreferences("com.example.recorder", Context.MODE_PRIVATE)
+
     private var _elapsedTime = MutableLiveData<String>()
+
     val elapsedTime: LiveData<String>
         get() = _elapsedTime
+
     private lateinit var timer: CountDownTimer
 
     init {
@@ -31,12 +36,13 @@ class RecordViewModel constructor(private val app: Application) : AndroidViewMod
             "%02d:%02d:%02d",
             TimeUnit.MILLISECONDS.toHours(time) % 60,
             TimeUnit.MILLISECONDS.toMinutes(time) % 60,
-            TimeUnit.MILLISECONDS.toSeconds(time) % 60
-        )
+            TimeUnit.MILLISECONDS.toSeconds(time) % 60)
     }
 
     fun stopTimer() {
-        timer.cancel()
+        if (this::timer.isInitialized) {
+            timer.cancel()
+        }
         resetTimer()
     }
 
