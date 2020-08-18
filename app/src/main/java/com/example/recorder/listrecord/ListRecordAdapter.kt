@@ -6,11 +6,11 @@ import android.view.ViewGroup
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import com.example.recorder.R
-import com.example.recorder.database.RecordingItem
+import com.example.recorder.repository.database.Record
 import java.util.concurrent.TimeUnit
 
 class ListRecordAdapter : RecyclerView.Adapter<ListRecordAdapter.ViewHolder>() {
-    var data = listOf<RecordingItem>()
+    var data = listOf<Record>()
         set(value) {
             field = value
             notifyDataSetChanged()
