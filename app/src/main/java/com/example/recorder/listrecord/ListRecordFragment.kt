@@ -9,7 +9,7 @@ import android.view.ViewGroup
 import androidx.databinding.DataBindingUtil
 import androidx.lifecycle.Observer
 import com.example.recorder.R
-import com.example.recorder.database.RecordDatabase
+import com.example.recorder.repository.database.RecordDatabase
 import com.example.recorder.databinding.FragmentListRecordBinding
 
 
