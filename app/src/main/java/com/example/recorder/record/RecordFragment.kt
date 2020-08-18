@@ -1,5 +1,6 @@
 package com.example.recorder.record
 
+import android.app.Application
 import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.content.Intent
@@ -14,22 +15,18 @@ import android.view.WindowManager
 import android.widget.Toast
 import androidx.core.content.ContextCompat
 import androidx.databinding.DataBindingUtil
-import androidx.lifecycle.Observer
-import androidx.lifecycle.ViewModelProvider
 import com.example.recorder.MainActivity
 import com.example.recorder.R
-import com.example.recorder.database.RecordDatabase
-import com.example.recorder.database.RecordDatabaseDao
+import com.example.recorder.repository.database.RecordDatabase
+import com.example.recorder.repository.database.RecordDatabaseDao
 import com.example.recorder.databinding.FragmentRecordBinding
 import kotlinx.android.synthetic.main.fragment_record.*
 import java.io.File
 
 class RecordFragment : Fragment() {
 
-    private lateinit var viewModel: RecordViewModel
+    private lateinit var recordViewModel: RecordViewModel
     private lateinit var mainActivity: MainActivity
-//    private var count: Int? = null
-    private var database: RecordDatabaseDao? = null
     private val MY_PERMISSIONS_RECORD_AUDIO = 123
 
     override fun onCreateView(
@@ -41,20 +38,15 @@ class RecordFragment : Fragment() {
             R.layout.fragment_record,
             container, false
         )
-
-        database = context?.let { RecordDatabase.getInstance(it).recordDatabaseDao }
-
-//        database?.getCount()?.observe(this.viewLifecycleOwner, Observer { count = it })
+        recordViewModel = initRecordViewModel()
 
         mainActivity = activity as MainActivity
 
-        viewModel = ViewModelProvider(this).get(RecordViewModel::class.java)
-
-        binding.recordViewModel = viewModel
+        binding.recordViewModel = recordViewModel
         binding.lifecycleOwner = viewLifecycleOwner
 
         if (!mainActivity.isServiceRunning()) {
-            viewModel.resetTimer()
+            recordViewModel.resetTimer()
         } else {
             binding.playButton.setImageResource(R.drawable.ic_stop)
         }
@@ -72,10 +64,10 @@ class RecordFragment : Fragment() {
             } else {
                 if (mainActivity.isServiceRunning()) {
                     onRecord(false)
-                    viewModel.stopTimer()
+                    recordViewModel.stopTimer()
                 } else {
                     onRecord(true)
-                    viewModel.startTimer()
+                    recordViewModel.startTimer()
                 }
             }
         }
@@ -90,7 +82,6 @@ class RecordFragment : Fragment() {
 
     private fun onRecord(start: Boolean) {
         val intent = Intent(activity, RecordService::class.java)
-//        intent.putExtra("COUNT", count)
         if (start) {
             playButton.setImageResource(R.drawable.ic_stop)
             Toast.makeText(activity, R.string.toast_recording_start, Toast.LENGTH_LONG).show()
@@ -119,7 +110,7 @@ class RecordFragment : Fragment() {
                     PackageManager.PERMISSION_GRANTED
                 ) {
                     onRecord(true)
-                    viewModel.startTimer()
+                    recordViewModel.startTimer()
                 } else {
                     Toast.makeText(
                         activity,
@@ -144,5 +135,11 @@ class RecordFragment : Fragment() {
                 requireActivity().getSystemService(NotificationManager::class.java)
             notificationManager.createNotificationChannel(notificationChannel)
         }
+    }
+
+    private fun initRecordViewModel(): RecordViewModel {
+        val application = requireNotNull(activity).application
+        val recordViewModelFactory = RecordViewModelFactory(application)
+        return recordViewModelFactory.create(RecordViewModel::class.java)
     }
 }
