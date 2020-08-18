@@ -8,12 +8,16 @@ import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
+import com.example.recorder.repository.RecordsRepository
+import com.example.recorder.repository.Repository
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.util.concurrent.TimeUnit
 
-class RecordViewModel constructor(private val app: Application) : AndroidViewModel(app) {
+class RecordViewModel (val app: Application) : AndroidViewModel(app) {
+
+    private val repository: Repository = RecordsRepository.getInstance(app)
 
     private val TRIGGER_TIME = "TRIGGER_AT"
     private val second: Long = 1_000L
@@ -36,7 +40,8 @@ class RecordViewModel constructor(private val app: Application) : AndroidViewMod
             "%02d:%02d:%02d",
             TimeUnit.MILLISECONDS.toHours(time) % 60,
             TimeUnit.MILLISECONDS.toMinutes(time) % 60,
-            TimeUnit.MILLISECONDS.toSeconds(time) % 60)
+            TimeUnit.MILLISECONDS.toSeconds(time) % 60
+        )
     }
 
     fun stopTimer() {

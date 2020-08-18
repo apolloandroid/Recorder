@@ -1,6 +1,6 @@
 package com.example.recorder.record
 
-import android.app.Application
+
 import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.content.Intent
@@ -17,8 +17,6 @@ import androidx.core.content.ContextCompat
 import androidx.databinding.DataBindingUtil
 import com.example.recorder.MainActivity
 import com.example.recorder.R
-import com.example.recorder.repository.database.RecordDatabase
-import com.example.recorder.repository.database.RecordDatabaseDao
 import com.example.recorder.databinding.FragmentRecordBinding
 import kotlinx.android.synthetic.main.fragment_record.*
 import java.io.File

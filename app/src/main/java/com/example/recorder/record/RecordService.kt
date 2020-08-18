@@ -11,12 +11,11 @@ import android.widget.Toast
 import androidx.core.app.NotificationCompat
 import com.example.recorder.MainActivity
 import com.example.recorder.R
-import com.example.recorder.database.RecordDatabase
-import com.example.recorder.database.RecordDatabaseDao
-import com.example.recorder.database.RecordingItem
+import com.example.recorder.repository.database.RecordDatabase
+import com.example.recorder.repository.database.RecordDatabaseDao
+import com.example.recorder.repository.database.Record
 import kotlinx.coroutines.*
 import java.io.File
-import java.io.IOException
 import java.lang.Exception
 import java.text.SimpleDateFormat
 
@@ -107,7 +106,7 @@ class RecordService : Service() {
     }
 
     private fun stopRecording() {
-        val recordingItem = RecordingItem()
+        val recordingItem = Record()
 
         mRecorder?.stop()
         mElapsedTimeMillis = System.currentTimeMillis() - mStartingTimeMillis
