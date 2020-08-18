@@ -1,11 +1,11 @@
-package com.example.recorder.database
+package com.example.recorder.repository.database
 
 import android.content.Context
 import androidx.room.Database
 import androidx.room.Room
 import androidx.room.RoomDatabase
 
-@Database(entities = [RecordingItem::class], version = 1, exportSchema = false)
+@Database(entities = [Record::class], version = 2, exportSchema = false)
 abstract class RecordDatabase : RoomDatabase() {
     abstract val recordDatabaseDao: RecordDatabaseDao
 
@@ -15,13 +15,14 @@ abstract class RecordDatabase : RoomDatabase() {
 
         fun getInstance(context: Context): RecordDatabase {
             synchronized(this) {
-                var instance = INSTANCE
+                var instance =
+                    INSTANCE
                 if (instance == null) {
                     instance =
                         Room.databaseBuilder(
                             context.applicationContext, RecordDatabase::class.java,
-                            "record_database"
-                        ).fallbackToDestructiveMigration().build()
+                            "records")
+                            .fallbackToDestructiveMigration().build()
                     INSTANCE = instance
                 }
                 return instance

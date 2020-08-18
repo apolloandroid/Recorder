@@ -1,11 +1,11 @@
-package com.example.recorder.database
+package com.example.recorder.repository.database
 
 import androidx.room.ColumnInfo
 import androidx.room.Entity
 import androidx.room.PrimaryKey
 
-@Entity(tableName = "recording_table")
-data class RecordingItem(
+@Entity(tableName = "records")
+data class Record(
     @PrimaryKey(autoGenerate = true)
     val id: Long = 0L,
     @ColumnInfo(name="name")
