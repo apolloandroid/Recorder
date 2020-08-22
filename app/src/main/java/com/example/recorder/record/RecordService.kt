@@ -29,10 +29,7 @@ class RecordService : Service() {
     private var mStartingTimeMillis: Long = 0
     private var mElapsedTimeMillis: Long = 0
 
-    private var mDatabase: RecordDatabaseDao? = null
-
-    private val mJob = Job()
-    private val mUiScope = CoroutineScope(Dispatchers.Main + mJob)
+    private lateinit var mDatabase: RecordDatabaseDao
 
     override fun onBind(intent: Intent?): IBinder? {
         return null
@@ -121,11 +118,7 @@ class RecordService : Service() {
         mRecorder = null
 
         try {
-            mUiScope.launch {
-                withContext(Dispatchers.IO) {
-                    mDatabase?.insertRecord(recordingItem)
-                }
-            }
+            mDatabase.insertRecord(recordingItem)
         } catch (e: Exception) {
             Log.e("RecordService", "exception", e)
         }
