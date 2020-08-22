@@ -1,35 +1,45 @@
 package com.example.recorder.record
 
-import android.app.Application
+import android.app.NotificationChannel
+import android.app.NotificationManager
 import android.content.Context
+import android.content.Intent
+import android.os.Build
 import android.os.CountDownTimer
 import android.os.SystemClock
-import androidx.lifecycle.AndroidViewModel
-import androidx.lifecycle.LiveData
-import androidx.lifecycle.MutableLiveData
-import androidx.lifecycle.viewModelScope
+import android.view.WindowManager
+import android.widget.Toast
+import androidx.lifecycle.*
+import com.example.recorder.R
 import com.example.recorder.repository.RecordsRepository
 import com.example.recorder.repository.Repository
+import kotlinx.android.synthetic.main.fragment_record.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import java.io.File
 import java.util.concurrent.TimeUnit
 
-class RecordViewModel (val app: Application) : AndroidViewModel(app) {
+class RecordViewModel(private val context: Context) : ViewModel() {
 
-    private val repository: Repository = RecordsRepository.getInstance(app)
+    private val repository: Repository = RecordsRepository.getInstance(context)
 
     private val TRIGGER_TIME = "TRIGGER_AT"
     private val second: Long = 1_000L
 
-    private val prefs = app.getSharedPreferences("com.example.recorder", Context.MODE_PRIVATE)
+    private val prefs = context.getSharedPreferences("com.example.recorder", Context.MODE_PRIVATE)
 
     private var _elapsedTime = MutableLiveData<String>()
 
     val elapsedTime: LiveData<String>
         get() = _elapsedTime
 
+    private var _notificationChannelCreated = MutableLiveData<Boolean>()
+    val notificationChannelCreated: LiveData<Boolean>
+        get() = _notificationChannelCreated
+
     private lateinit var timer: CountDownTimer
+
 
     init {
         createTimer()
@@ -44,14 +54,14 @@ class RecordViewModel (val app: Application) : AndroidViewModel(app) {
         )
     }
 
-    fun stopTimer() {
+    private fun stopTimer() {
         if (this::timer.isInitialized) {
             timer.cancel()
         }
         resetTimer()
     }
 
-    fun startTimer() {
+    private fun startTimer() {
         val triggerTime = SystemClock.elapsedRealtime()
 //        change to custom scope
         viewModelScope.launch {
@@ -93,7 +103,38 @@ class RecordViewModel (val app: Application) : AndroidViewModel(app) {
         withContext(Dispatchers.IO) {
             prefs.getLong(TRIGGER_TIME, 0)
         }
+
+
+    fun onRecord(start: Boolean) {
+        val intent = Intent(context, RecordService::class.java)
+        if (start) {
+            val folder =
+                File(context.getExternalFilesDir(null)?.absolutePath.toString() + "/Recorder")
+            if (!folder.exists()) {
+                folder.mkdir()
+            }
+            context.startService(intent)
+            startTimer()
+        } else {
+            context.stopService(intent)
+            stopTimer()
+        }
+    }
+
+    fun createNotificationChannel(channelId: String, channelName: String) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            val notificationChannel = NotificationChannel(
+                channelId, channelName, NotificationManager.IMPORTANCE_DEFAULT
+            )
+                .apply {
+                    setShowBadge(false)
+                    setSound(null, null)
+                }
+        }
+        _notificationChannelCreated.value = true
+    }
 }
+
 
 
 
