@@ -1,19 +1,19 @@
 package com.example.recorder.repository
 
-import android.app.Application
+import android.content.Context
 import androidx.lifecycle.LiveData
 import com.example.recorder.repository.database.Record
 import com.example.recorder.repository.database.RecordDatabase
 
-class RecordsRepository private constructor(application: Application) : Repository {
+class RecordsRepository private constructor(context: Context) : Repository {
 
-    private val recordsDatabaseDao = RecordDatabase.getInstance(application).recordDatabaseDao
+    private val recordsDatabaseDao = RecordDatabase.getInstance(context).recordDatabaseDao
 
     companion object {
-        fun getInstance(application: Application): Repository {
+        fun getInstance(context: Context): Repository {
             var instance: Repository? = null
             if (instance == null) {
-                instance = RecordsRepository(application)
+                instance = RecordsRepository(context)
             }
             return instance
         }
