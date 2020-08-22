@@ -20,7 +20,7 @@ abstract class RecordDatabase : RoomDatabase() {
                 if (instance == null) {
                     instance =
                         Room.databaseBuilder(
-                            context.applicationContext, RecordDatabase::class.java,
+                            context, RecordDatabase::class.java,
                             "records")
                             .fallbackToDestructiveMigration().build()
                     INSTANCE = instance
