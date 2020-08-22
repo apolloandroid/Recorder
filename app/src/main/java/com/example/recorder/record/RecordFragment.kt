@@ -3,7 +3,6 @@ package com.example.recorder.record
 
 import android.app.NotificationChannel
 import android.app.NotificationManager
-import android.content.Intent
 import android.content.pm.PackageManager
 import android.os.Build
 import android.os.Bundle
@@ -19,7 +18,6 @@ import com.example.recorder.MainActivity
 import com.example.recorder.R
 import com.example.recorder.databinding.FragmentRecordBinding
 import kotlinx.android.synthetic.main.fragment_record.*
-import java.io.File
 
 class RecordFragment : Fragment() {
 
@@ -43,31 +41,14 @@ class RecordFragment : Fragment() {
         binding.recordViewModel = recordViewModel
         binding.lifecycleOwner = viewLifecycleOwner
 
-        if (!mainActivity.isServiceRunning()) {
+        if (!isServicesRunning()) {
             recordViewModel.resetTimer()
         } else {
             binding.playButton.setImageResource(R.drawable.ic_stop)
         }
 
         binding.playButton.setOnClickListener {
-            if (ContextCompat.checkSelfPermission(
-                    requireContext(),
-                    android.Manifest.permission.RECORD_AUDIO
-                ) != PackageManager.PERMISSION_GRANTED
-            ) {
-                requestPermissions(
-                    arrayOf(android.Manifest.permission.RECORD_AUDIO),
-                    MY_PERMISSIONS_RECORD_AUDIO
-                )
-            } else {
-                if (mainActivity.isServiceRunning()) {
-                    onRecord(false)
-                    recordViewModel.stopTimer()
-                } else {
-                    onRecord(true)
-                    recordViewModel.startTimer()
-                }
-            }
+            onPlayButtonClickListener()
         }
 
         createNotificationChannel(
@@ -78,24 +59,32 @@ class RecordFragment : Fragment() {
         return binding.root
     }
 
-    private fun onRecord(start: Boolean) {
-        val intent = Intent(activity, RecordService::class.java)
-        if (start) {
-            playButton.setImageResource(R.drawable.ic_stop)
-            Toast.makeText(activity, R.string.toast_recording_start, Toast.LENGTH_LONG).show()
-            val folder =
-                File(activity?.getExternalFilesDir(null)?.absolutePath.toString() + "/Recorder")
-            if (!folder.exists()) {
-                folder.mkdir()
-            }
-            activity?.startService(intent)
-            activity?.window?.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
+    private fun onPlayButtonClickListener() {
+        if (isPermissions()) {
+            requestPermissions(
+                arrayOf(android.Manifest.permission.RECORD_AUDIO),
+                MY_PERMISSIONS_RECORD_AUDIO
+            )
         } else {
-            playButton.setImageResource(R.drawable.ic_microphone)
-            activity?.stopService(intent)
-            activity?.window?.clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
+            if (isServicesRunning()) {
+                playButton.setImageResource(R.drawable.ic_microphone)
+                recordViewModel.onRecord(false)
+            } else {
+                playButton.setImageResource(R.drawable.ic_stop)
+                recordViewModel.onRecord(true)
+                Toast.makeText(activity, R.string.toast_recording_start, Toast.LENGTH_SHORT).show()
+            }
         }
     }
+
+    private fun isPermissions(): Boolean =
+        ContextCompat.checkSelfPermission(
+            requireContext(),
+            android.Manifest.permission.RECORD_AUDIO
+        ) != PackageManager.PERMISSION_GRANTED
+
+    private fun isServicesRunning(): Boolean =
+        mainActivity.isServiceRunning()
 
     override fun onRequestPermissionsResult(
         requestCode: Int,
@@ -107,8 +96,7 @@ class RecordFragment : Fragment() {
                 if (grantResults.isNotEmpty() && grantResults[0] ==
                     PackageManager.PERMISSION_GRANTED
                 ) {
-                    onRecord(true)
-                    recordViewModel.startTimer()
+                    recordViewModel.onRecord(true)
                 } else {
                     Toast.makeText(
                         activity,
