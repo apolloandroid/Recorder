@@ -17,8 +17,8 @@ class ListRecordAdapter : RecyclerView.Adapter<ListRecordAdapter.ViewHolder>() {
         }
 
     class ViewHolder private constructor(itemView: View) : RecyclerView.ViewHolder(itemView) {
-        var vName: TextView = itemView.findViewById(R.id.file_name_text)
-        var vLength: TextView = itemView.findViewById(R.id.file_length_text)
+        var vName: TextView = itemView.findViewById(R.id.text_file_name)
+        var vLength: TextView = itemView.findViewById(R.id.text_file_length)
 
         companion object {
             fun from(parent: ViewGroup): ViewHolder {
