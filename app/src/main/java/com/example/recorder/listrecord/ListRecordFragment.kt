@@ -28,7 +28,7 @@ class ListRecordFragment : Fragment() {
         val listRecordViewModel = viewModelFactory.create(ListRecordViewModel::class.java)
         binding.listRecordViewModel = listRecordViewModel
         val adapter = ListRecordAdapter()
-        binding.recyclerView.adapter = adapter
+        binding.listRecords.adapter = adapter
         listRecordViewModel.records.observe(this, Observer {
             it.let { adapter.data = it }
         })
