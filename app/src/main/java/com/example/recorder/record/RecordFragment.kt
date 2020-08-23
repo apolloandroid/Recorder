@@ -1,16 +1,11 @@
 package com.example.recorder.record
 
-
-import android.app.NotificationChannel
-import android.app.NotificationManager
 import android.content.pm.PackageManager
-import android.os.Build
 import android.os.Bundle
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.view.WindowManager
 import android.widget.Toast
 import androidx.core.content.ContextCompat
 import androidx.databinding.DataBindingUtil
@@ -21,7 +16,8 @@ import kotlinx.android.synthetic.main.fragment_record.*
 
 class RecordFragment : Fragment() {
 
-    private lateinit var recordViewModel: RecordViewModel
+    private val recordViewModel: RecordViewModel by lazy { initRecordViewModel() }
+    private lateinit var binding: FragmentRecordBinding
     private lateinit var mainActivity: MainActivity
     private val MY_PERMISSIONS_RECORD_AUDIO = 123
 
@@ -29,34 +25,39 @@ class RecordFragment : Fragment() {
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
-        val binding = DataBindingUtil.inflate<FragmentRecordBinding>(
+        binding = DataBindingUtil.inflate(
             inflater,
             R.layout.fragment_record,
             container, false
         )
-        recordViewModel = initRecordViewModel()
 
         mainActivity = activity as MainActivity
 
         binding.recordViewModel = recordViewModel
         binding.lifecycleOwner = viewLifecycleOwner
 
-        if (!isServicesRunning()) {
+        if (!isTimerRunning()) {
             recordViewModel.resetTimer()
         } else {
-            binding.playButton.setImageResource(R.drawable.ic_stop)
+            setPlayButtonImageResource(false)
         }
 
-        binding.playButton.setOnClickListener {
+        binding.buttonPlay.setOnClickListener {
             onPlayButtonClickListener()
         }
 
-        createNotificationChannel(
+        recordViewModel.createNotificationChannel(
             getString(R.string.notification_channel_id),
             getString(R.string.notification_channel_name)
         )
 
         return binding.root
+    }
+
+    private fun initRecordViewModel(): RecordViewModel {
+        val application = requireNotNull(activity).application
+        val recordViewModelFactory = RecordViewModelFactory(application)
+        return recordViewModelFactory.create(RecordViewModel::class.java)
     }
 
     private fun onPlayButtonClickListener() {
@@ -66,11 +67,11 @@ class RecordFragment : Fragment() {
                 MY_PERMISSIONS_RECORD_AUDIO
             )
         } else {
-            if (isServicesRunning()) {
-                playButton.setImageResource(R.drawable.ic_microphone)
+            if (isTimerRunning()) {
+                setPlayButtonImageResource(true)
                 recordViewModel.onRecord(false)
             } else {
-                playButton.setImageResource(R.drawable.ic_stop)
+                setPlayButtonImageResource(false)
                 recordViewModel.onRecord(true)
                 Toast.makeText(activity, R.string.toast_recording_start, Toast.LENGTH_SHORT).show()
             }
@@ -83,7 +84,7 @@ class RecordFragment : Fragment() {
             android.Manifest.permission.RECORD_AUDIO
         ) != PackageManager.PERMISSION_GRANTED
 
-    private fun isServicesRunning(): Boolean =
+    private fun isTimerRunning(): Boolean =
         mainActivity.isServiceRunning()
 
     override fun onRequestPermissionsResult(
@@ -108,24 +109,10 @@ class RecordFragment : Fragment() {
         }
     }
 
-    private fun createNotificationChannel(channelId: String, channelName: String) {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            val notificationChannel = NotificationChannel(
-                channelId, channelName, NotificationManager.IMPORTANCE_DEFAULT
-            )
-                .apply {
-                    setShowBadge(false)
-                    setSound(null, null)
-                }
-            val notificationManager =
-                requireActivity().getSystemService(NotificationManager::class.java)
-            notificationManager.createNotificationChannel(notificationChannel)
+    private fun setPlayButtonImageResource(isTimerRunning: Boolean) {
+        when (isTimerRunning) {
+            true -> binding.buttonPlay.setImageResource(R.drawable.ic_microphone)
+            false -> button_play.setImageResource(R.drawable.ic_stop)
         }
-    }
-
-    private fun initRecordViewModel(): RecordViewModel {
-        val application = requireNotNull(activity).application
-        val recordViewModelFactory = RecordViewModelFactory(application)
-        return recordViewModelFactory.create(RecordViewModel::class.java)
     }
 }

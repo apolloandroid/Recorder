@@ -4,11 +4,14 @@ import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.content.Context
 import android.content.Intent
+import android.content.pm.PackageManager
 import android.os.Build
 import android.os.CountDownTimer
 import android.os.SystemClock
 import android.view.WindowManager
 import android.widget.Toast
+import androidx.core.content.ContentProviderCompat.requireContext
+import androidx.core.content.ContextCompat
 import androidx.lifecycle.*
 import com.example.recorder.R
 import com.example.recorder.repository.RecordsRepository
@@ -35,14 +38,28 @@ class RecordViewModel(private val context: Context) : ViewModel() {
         get() = _elapsedTime
 
     private var _notificationChannelCreated = MutableLiveData<Boolean>()
-    val notificationChannelCreated: LiveData<Boolean>
-        get() = _notificationChannelCreated
 
     private lateinit var timer: CountDownTimer
 
 
     init {
         createTimer()
+    }
+
+    fun onRecord(start: Boolean) {
+        val intent = Intent(context, RecordService::class.java)
+        if (start) {
+            val folder =
+                File(context.getExternalFilesDir(null)?.absolutePath.toString() + "/Recorder")
+            if (!folder.exists()) {
+                folder.mkdir()
+            }
+            context.startService(intent)
+            startTimer()
+        } else {
+            context.stopService(intent)
+            stopTimer()
+        }
     }
 
     fun timeFormatter(time: Long): String {
@@ -104,23 +121,6 @@ class RecordViewModel(private val context: Context) : ViewModel() {
             prefs.getLong(TRIGGER_TIME, 0)
         }
 
-
-    fun onRecord(start: Boolean) {
-        val intent = Intent(context, RecordService::class.java)
-        if (start) {
-            val folder =
-                File(context.getExternalFilesDir(null)?.absolutePath.toString() + "/Recorder")
-            if (!folder.exists()) {
-                folder.mkdir()
-            }
-            context.startService(intent)
-            startTimer()
-        } else {
-            context.stopService(intent)
-            stopTimer()
-        }
-    }
-
     fun createNotificationChannel(channelId: String, channelName: String) {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             val notificationChannel = NotificationChannel(
@@ -130,6 +130,10 @@ class RecordViewModel(private val context: Context) : ViewModel() {
                     setShowBadge(false)
                     setSound(null, null)
                 }
+            val notificationManager =
+                context.getSystemService(NotificationManager::class.java)
+            notificationManager.createNotificationChannel(notificationChannel)
+
         }
         _notificationChannelCreated.value = true
     }
