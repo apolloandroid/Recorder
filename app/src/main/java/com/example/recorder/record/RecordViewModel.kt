@@ -26,7 +26,8 @@ import java.util.concurrent.TimeUnit
 class RecordViewModel(private val context: Context) : ViewModel() {
 
     private val repository: Repository = RecordsRepository.getInstance(context)
-
+    private val channelId = context.getString(R.string.notification_channel_id)
+    private val channelName = context.getString(R.string.notification_channel_name)
     private val TRIGGER_TIME = "TRIGGER_AT"
     private val second: Long = 1_000L
 
@@ -37,13 +38,30 @@ class RecordViewModel(private val context: Context) : ViewModel() {
     val elapsedTime: LiveData<String>
         get() = _elapsedTime
 
-    private var _notificationChannelCreated = MutableLiveData<Boolean>()
+    private var _isPermissions = MutableLiveData<Boolean>(false)
+    val isPermission: LiveData<Boolean>
+        get() = _isPermissions
 
     private lateinit var timer: CountDownTimer
 
 
     init {
-        createTimer()
+        createNotificationChannel()
+    }
+
+    private fun createNotificationChannel() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            val notificationChannel = NotificationChannel(
+                channelId, channelName, NotificationManager.IMPORTANCE_DEFAULT
+            )
+                .apply {
+                    setShowBadge(false)
+                    setSound(null, null)
+                }
+            val notificationManager =
+                context.getSystemService(NotificationManager::class.java)
+            notificationManager.createNotificationChannel(notificationChannel)
+        }
     }
 
     fun onRecord(start: Boolean) {
@@ -120,23 +138,6 @@ class RecordViewModel(private val context: Context) : ViewModel() {
         withContext(Dispatchers.IO) {
             prefs.getLong(TRIGGER_TIME, 0)
         }
-
-    fun createNotificationChannel(channelId: String, channelName: String) {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            val notificationChannel = NotificationChannel(
-                channelId, channelName, NotificationManager.IMPORTANCE_DEFAULT
-            )
-                .apply {
-                    setShowBadge(false)
-                    setSound(null, null)
-                }
-            val notificationManager =
-                context.getSystemService(NotificationManager::class.java)
-            notificationManager.createNotificationChannel(notificationChannel)
-
-        }
-        _notificationChannelCreated.value = true
-    }
 }
 
 

@@ -9,6 +9,7 @@ import android.view.ViewGroup
 import android.widget.Toast
 import androidx.core.content.ContextCompat
 import androidx.databinding.DataBindingUtil
+import androidx.lifecycle.Observer
 import com.example.recorder.MainActivity
 import com.example.recorder.R
 import com.example.recorder.databinding.FragmentRecordBinding
@@ -36,7 +37,7 @@ class RecordFragment : Fragment() {
         binding.recordViewModel = recordViewModel
         binding.lifecycleOwner = viewLifecycleOwner
 
-        if (!isTimerRunning()) {
+        if (!mainActivity.isTimerRunning()) {
             recordViewModel.resetTimer()
         } else {
             setPlayButtonImageResource(false)
@@ -46,10 +47,9 @@ class RecordFragment : Fragment() {
             onPlayButtonClickListener()
         }
 
-        recordViewModel.createNotificationChannel(
-            getString(R.string.notification_channel_id),
-            getString(R.string.notification_channel_name)
-        )
+        recordViewModel.isPermission.observe(viewLifecycleOwner, Observer {
+            if (!it) requestPermissions()
+        })
 
         return binding.root
     }
@@ -61,13 +61,10 @@ class RecordFragment : Fragment() {
     }
 
     private fun onPlayButtonClickListener() {
-        if (isPermissions()) {
-            requestPermissions(
-                arrayOf(android.Manifest.permission.RECORD_AUDIO),
-                MY_PERMISSIONS_RECORD_AUDIO
-            )
+        if (!isPermissions()) {
+            requestPermissions()
         } else {
-            if (isTimerRunning()) {
+            if (mainActivity.isTimerRunning()) {
                 setPlayButtonImageResource(true)
                 recordViewModel.onRecord(false)
             } else {
@@ -82,10 +79,14 @@ class RecordFragment : Fragment() {
         ContextCompat.checkSelfPermission(
             requireContext(),
             android.Manifest.permission.RECORD_AUDIO
-        ) != PackageManager.PERMISSION_GRANTED
+        ) == PackageManager.PERMISSION_GRANTED
 
-    private fun isTimerRunning(): Boolean =
-        mainActivity.isServiceRunning()
+    private fun requestPermissions() {
+        requestPermissions(
+            arrayOf(android.Manifest.permission.RECORD_AUDIO),
+            MY_PERMISSIONS_RECORD_AUDIO
+        )
+    }
 
     override fun onRequestPermissionsResult(
         requestCode: Int,
@@ -97,7 +98,7 @@ class RecordFragment : Fragment() {
                 if (grantResults.isNotEmpty() && grantResults[0] ==
                     PackageManager.PERMISSION_GRANTED
                 ) {
-                    recordViewModel.onRecord(true)
+//                    recordViewModel.onRecord(true)
                 } else {
                     Toast.makeText(
                         activity,

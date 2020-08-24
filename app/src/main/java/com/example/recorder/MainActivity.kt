@@ -20,7 +20,7 @@ class MainActivity : AppCompatActivity() {
         )
     }
 
-    fun isServiceRunning(): Boolean {
+    fun isTimerRunning(): Boolean {
         val activityManager = getSystemService(Context.ACTIVITY_SERVICE) as ActivityManager
         for (service in activityManager.getRunningServices(Int.MAX_VALUE)) {
             if ("com.example.recorder.record.RecordService" == service.service.className) {

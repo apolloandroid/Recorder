@@ -11,6 +11,8 @@ import android.widget.Toast
 import androidx.core.app.NotificationCompat
 import com.example.recorder.MainActivity
 import com.example.recorder.R
+import com.example.recorder.repository.RecordsRepository
+import com.example.recorder.repository.Repository
 import com.example.recorder.repository.database.RecordDatabase
 import com.example.recorder.repository.database.RecordDatabaseDao
 import com.example.recorder.repository.database.Record
@@ -29,7 +31,9 @@ class RecordService : Service() {
     private var mStartingTimeMillis: Long = 0
     private var mElapsedTimeMillis: Long = 0
 
-    private lateinit var mDatabase: RecordDatabaseDao
+    private val recordServiceScope = CoroutineScope(Dispatchers.IO + Job())
+
+    private lateinit var repository: Repository
 
     override fun onBind(intent: Intent?): IBinder? {
         return null
@@ -37,7 +41,7 @@ class RecordService : Service() {
 
     override fun onCreate() {
         super.onCreate()
-        mDatabase = RecordDatabase.getInstance(application).recordDatabaseDao
+        repository = RecordsRepository.getInstance(application)
     }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
@@ -118,7 +122,9 @@ class RecordService : Service() {
         mRecorder = null
 
         try {
-            mDatabase.insertRecord(recordingItem)
+            recordServiceScope.launch {
+                repository.insertRecord(recordingItem)
+            }
         } catch (e: Exception) {
             Log.e("RecordService", "exception", e)
         }
