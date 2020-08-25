@@ -1,6 +1,5 @@
 package com.example.recorder.listrecord
 
-import android.annotation.SuppressLint
 import android.os.Bundle
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
@@ -15,7 +14,6 @@ import com.example.recorder.databinding.FragmentListRecordBinding
 
 class ListRecordFragment : Fragment() {
 
-    @SuppressLint("FragmentLiveDataObserve")
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
@@ -29,7 +27,7 @@ class ListRecordFragment : Fragment() {
         binding.listRecordViewModel = listRecordViewModel
         val adapter = ListRecordAdapter()
         binding.listRecords.adapter = adapter
-        listRecordViewModel.records.observe(this, Observer {
+        listRecordViewModel.records.observe(viewLifecycleOwner, Observer {
             it.let { adapter.data = it }
         })
         return binding.root
