@@ -1,9 +1,9 @@
 package com.example.recorder.di
 
-import androidx.fragment.app.Fragment
+import com.example.recorder.record.RecordFragment
 import dagger.Component
 
 @Component(modules = [RecordsFragmentModule::class])
 interface AppComponent {
-    fun injectRecordsFragment(recordsFragment: Fragment)
+    fun injectRecordsFragment(recordsFragment: RecordFragment)
 }
