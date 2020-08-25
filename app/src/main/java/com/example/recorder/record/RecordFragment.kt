@@ -66,12 +66,6 @@ class RecordFragment : Fragment() {
         component?.injectRecordsFragment(this)
     }
 
-//    private fun initRecordViewModel(): RecordViewModel {
-//        val application = requireNotNull(activity).application
-//        val recordViewModelFactory = RecordViewModelFactory(application)
-//        return recordViewModelFactory.create(RecordViewModel::class.java)
-//    }
-
     private fun onPlayButtonClickListener() {
         if (!isPermissions()) {
             requestPermissions()
