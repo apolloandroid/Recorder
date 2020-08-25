@@ -13,11 +13,14 @@ import androidx.lifecycle.Observer
 import com.example.recorder.MainActivity
 import com.example.recorder.R
 import com.example.recorder.databinding.FragmentRecordBinding
+import com.example.recorder.di.DaggerAppComponent
+import com.example.recorder.di.RecordsFragmentModule
 import kotlinx.android.synthetic.main.fragment_record.*
+import javax.inject.Inject
 
 class RecordFragment : Fragment() {
-
-    private val recordViewModel: RecordViewModel by lazy { initRecordViewModel() }
+    @Inject
+    lateinit var recordViewModel: RecordViewModel
     private lateinit var binding: FragmentRecordBinding
     private lateinit var mainActivity: MainActivity
     private val MY_PERMISSIONS_RECORD_AUDIO = 123
@@ -31,6 +34,7 @@ class RecordFragment : Fragment() {
             R.layout.fragment_record,
             container, false
         )
+        injectFragment()
 
         mainActivity = activity as MainActivity
 
@@ -54,11 +58,19 @@ class RecordFragment : Fragment() {
         return binding.root
     }
 
-    private fun initRecordViewModel(): RecordViewModel {
-        val application = requireNotNull(activity).application
-        val recordViewModelFactory = RecordViewModelFactory(application)
-        return recordViewModelFactory.create(RecordViewModel::class.java)
+    private fun injectFragment() {
+        val component =
+            DaggerAppComponent.builder()
+                .recordsFragmentModule(RecordsFragmentModule(this, context ?: return))
+                .build()
+        component?.injectRecordsFragment(this)
     }
+
+//    private fun initRecordViewModel(): RecordViewModel {
+//        val application = requireNotNull(activity).application
+//        val recordViewModelFactory = RecordViewModelFactory(application)
+//        return recordViewModelFactory.create(RecordViewModel::class.java)
+//    }
 
     private fun onPlayButtonClickListener() {
         if (!isPermissions()) {
