@@ -15,7 +15,6 @@ import com.example.recorder.R
 import com.example.recorder.databinding.FragmentRecordBinding
 import com.example.recorder.di.DaggerAppComponent
 import com.example.recorder.di.RecordsFragmentModule
-import kotlinx.android.synthetic.main.fragment_record.*
 import javax.inject.Inject
 
 class RecordFragment : Fragment() {
@@ -29,11 +28,7 @@ class RecordFragment : Fragment() {
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
-        binding = DataBindingUtil.inflate(
-            inflater,
-            R.layout.fragment_record,
-            container, false
-        )
+        binding = DataBindingUtil.inflate(inflater, R.layout.fragment_record, container, false)
         injectFragment()
 
         mainActivity = activity as MainActivity
@@ -47,9 +42,7 @@ class RecordFragment : Fragment() {
             setPlayButtonImageResource(false)
         }
 
-        binding.buttonPlay.setOnClickListener {
-            onPlayButtonClickListener()
-        }
+        binding.buttonPlay.setOnClickListener { onPlayButtonClickListener() }
 
         recordViewModel.isPermission.observe(viewLifecycleOwner, Observer {
             if (!it) requestPermissions()
@@ -59,10 +52,9 @@ class RecordFragment : Fragment() {
     }
 
     private fun injectFragment() {
-        val component =
-            DaggerAppComponent.builder()
-                .recordsFragmentModule(RecordsFragmentModule(context ?: return))
-                .build()
+        val component = DaggerAppComponent.builder()
+            .recordsFragmentModule(RecordsFragmentModule(context ?: return))
+            .build()
         component?.injectRecordsFragment(this)
     }
 
@@ -72,10 +64,10 @@ class RecordFragment : Fragment() {
         } else {
             if (mainActivity.isTimerRunning()) {
                 setPlayButtonImageResource(true)
-                recordViewModel.onRecord(false)
+                recordViewModel.stopRecord()
             } else {
                 setPlayButtonImageResource(false)
-                recordViewModel.onRecord(true)
+                recordViewModel.startRecord()
                 Toast.makeText(activity, R.string.toast_recording_start, Toast.LENGTH_SHORT).show()
             }
         }
@@ -99,27 +91,20 @@ class RecordFragment : Fragment() {
         permissions: Array<out String>,
         grantResults: IntArray
     ) {
-        when (requestCode) {
-            MY_PERMISSIONS_RECORD_AUDIO -> {
-                if (grantResults.isNotEmpty() && grantResults[0] ==
-                    PackageManager.PERMISSION_GRANTED
-                ) {
-//                    recordViewModel.onRecord(true)
-                } else {
-                    Toast.makeText(
-                        activity,
-                        getString(R.string.toast_recording_permissions), Toast.LENGTH_SHORT
-                    ).show()
-                }
-                return
+        if (requestCode == MY_PERMISSIONS_RECORD_AUDIO) {
+            if (grantResults.isNotEmpty() && grantResults[0] != PackageManager.PERMISSION_GRANTED) {
+                Toast.makeText(
+                    activity, getString(R.string.toast_recording_permissions), Toast.LENGTH_SHORT
+                ).show()
             }
+            return
         }
     }
 
     private fun setPlayButtonImageResource(isTimerRunning: Boolean) {
         when (isTimerRunning) {
             true -> binding.buttonPlay.setImageResource(R.drawable.ic_microphone)
-            false -> button_play.setImageResource(R.drawable.ic_stop)
+            false -> binding.buttonPlay.setImageResource(R.drawable.ic_stop)
         }
     }
 }
