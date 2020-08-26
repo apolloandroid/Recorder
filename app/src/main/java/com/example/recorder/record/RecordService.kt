@@ -1,26 +1,5 @@
 package com.example.recorder.record
 
-import android.app.Notification
-import android.app.PendingIntent
-import android.app.Service
-import android.content.Intent
-import android.media.MediaRecorder
-import android.os.IBinder
-import android.util.Log
-import android.widget.Toast
-import androidx.core.app.NotificationCompat
-import com.example.recorder.MainActivity
-import com.example.recorder.R
-import com.example.recorder.repository.RecordsRepository
-import com.example.recorder.repository.Repository
-import com.example.recorder.repository.database.RecordDatabase
-import com.example.recorder.repository.database.RecordDatabaseDao
-import com.example.recorder.repository.database.Record
-import kotlinx.coroutines.*
-import java.io.File
-import java.lang.Exception
-import java.text.SimpleDateFormat
-
 //class RecordService : Service() {
 //
 //    private var mFileName: String? = null
