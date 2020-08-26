@@ -36,6 +36,8 @@ class RecordFragment : Fragment() {
         binding.recordViewModel = recordViewModel
         binding.lifecycleOwner = viewLifecycleOwner
 
+        initObservers()
+
         if (!mainActivity.isTimerRunning()) {
             recordViewModel.resetTimer()
         } else {
@@ -43,10 +45,6 @@ class RecordFragment : Fragment() {
         }
 
         binding.buttonPlay.setOnClickListener { onPlayButtonClickListener() }
-
-        recordViewModel.isPermission.observe(viewLifecycleOwner, Observer {
-            if (!it) requestPermissions()
-        })
 
         return binding.root
     }
@@ -56,6 +54,12 @@ class RecordFragment : Fragment() {
             .recordsFragmentModule(RecordsFragmentModule(context ?: return))
             .build()
         component?.injectRecordsFragment(this)
+    }
+
+    private fun initObservers(){
+        recordViewModel.isPermission.observe(viewLifecycleOwner, Observer {
+            if (!it) requestPermissions()
+        })
     }
 
     private fun onPlayButtonClickListener() {
