@@ -5,7 +5,7 @@ import androidx.lifecycle.LiveData
 import com.example.recorder.repository.database.Record
 import com.example.recorder.repository.database.RecordDatabase
 
-class RecordsRepository private constructor(context: Context) : Repository {
+class RecordRepository private constructor(context: Context) : Repository {
 
     private val recordsDatabaseDao = RecordDatabase.getInstance(context).recordDatabaseDao
 
@@ -13,7 +13,7 @@ class RecordsRepository private constructor(context: Context) : Repository {
         fun getInstance(context: Context): Repository {
             var instance: Repository? = null
             if (instance == null) {
-                instance = RecordsRepository(context)
+                instance = RecordRepository(context)
             }
             return instance
         }
