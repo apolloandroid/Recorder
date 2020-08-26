@@ -14,7 +14,7 @@ import androidx.core.app.NotificationCompat
 import androidx.lifecycle.*
 import com.example.recorder.MainActivity
 import com.example.recorder.R
-import com.example.recorder.repository.RecordsRepository
+import com.example.recorder.repository.RecordRepository
 import com.example.recorder.repository.Repository
 import com.example.recorder.repository.database.Record
 import kotlinx.coroutines.*
@@ -25,7 +25,7 @@ import java.util.concurrent.TimeUnit
 
 class RecordViewModel(private val context: Context) : ViewModel() {
     private lateinit var timer: CountDownTimer
-    private val repository: Repository = RecordsRepository.getInstance(context)
+    private val repository: Repository = RecordRepository.getInstance(context)
     private val channelId = context.getString(R.string.notification_channel_id)
     private val channelName = context.getString(R.string.notification_channel_name)
     private val TRIGGER_TIME = "TRIGGER_AT"
@@ -151,7 +151,7 @@ class RecordService : Service() {
 
     override fun onCreate() {
         super.onCreate()
-        repository = RecordsRepository.getInstance(application)
+        repository = RecordRepository.getInstance(application)
     }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
