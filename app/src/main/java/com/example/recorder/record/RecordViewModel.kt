@@ -155,7 +155,6 @@ class RecordService : Service() {
     }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
-
         startRecording()
         return START_NOT_STICKY
     }

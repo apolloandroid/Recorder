@@ -23,7 +23,6 @@ class ListRecordFragment : Fragment() {
         val binding: FragmentListRecordBinding =
             DataBindingUtil.inflate(inflater, R.layout.fragment_list_record, container, false)
 
-        initViewModel()
         binding.listRecordViewModel = listRecordViewModel
         val adapter = ListRecordAdapter()
         binding.listRecords.adapter = adapter
