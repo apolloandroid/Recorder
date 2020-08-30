@@ -51,7 +51,7 @@ class RecordFragment : Fragment() {
 
     private fun injectFragment() {
         val component = DaggerAppComponent.builder()
-            .recordsFragmentModule(RecordsFragmentModule(context ?: return))
+            .recordsFragmentModule(RecordsFragmentModule(activity?.applicationContext!!))
             .build()
         component?.injectRecordsFragment(this)
     }
